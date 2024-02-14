@@ -11,11 +11,13 @@ int init_fs_info(void)
 	size=lseek(fd,0,2);
 	if(!valid(size))
 	{
+		write(1,"Cannot determine device size\n",29);
 		return 1;
 	}
 	sectors=size>>9;
 	if(sectors<=512)
 	{
+		write(1,"Device is too small\n",20);
 		return 1;
 	}
 	memcpy(bsec.jump,"\xeb\xfe\x90",3);
@@ -45,6 +47,7 @@ int init_fs_info(void)
 	{
 		if(bsec.sectors_per_cluster==64)
 		{
+			write(1,"Device is too large\n",20);
 			return 1;
 		}
 		clusters=(sectors-512)*512/(512*bsec.sectors_per_cluster+4);
@@ -70,6 +73,7 @@ int init_fs_info(void)
 	{
 		if(sectors>0xffffffff)
 		{
+			write(1,"Device is too large\n",20);
 			return 1;
 		}
 		bsec.sectors_large=sectors;
@@ -89,45 +93,52 @@ void buf_write(void *ptr,unsigned long int size)
 	{
 		if(size>=131072-buf_x)
 		{
-			memcpy(buf+buf_x,ptr,131072-buf_x);
+			if(ptr)
+			{
+				memcpy(buf+buf_x,ptr,131072-buf_x);
+				ptr=(char *)ptr+131072-buf_x;
+			}
+			else
+			{
+				memset(buf+buf_x,0,131072-buf_x);
+			}
 			size-=131072-buf_x;
-			ptr=(char *)ptr+131072-buf_x;
 			buf_x=0;
-			write(fd,buf,131072);
+			if(write(fd,buf,131072)!=131072)
+			{
+				write(1,"Failed to write data\n",21);
+				exit(2);
+			}
 		}
 		else
 		{
-			memcpy(buf+buf_x,ptr,size);
+			if(ptr)
+			{
+				memcpy(buf+buf_x,ptr,size);
+				ptr=(char *)ptr+size;
+			}
+			else
+			{
+				memset(buf+buf_x,0,size);
+			}
 			buf_x+=size;
-			ptr=(char *)ptr+size;
 			size=0;
 		}
 	}
 }
 void buf_write_zero(unsigned long int size)
 {
-	while(size)
-	{
-		if(size>=131072-buf_x)
-		{
-			memset(buf+buf_x,0,131072-buf_x);
-			size-=131072-buf_x;
-			buf_x=0;
-			write(fd,buf,131072);
-		}
-		else
-		{
-			memset(buf+buf_x,0,size);
-			buf_x+=size;
-			size=0;
-		}
-	}
+	buf_write(0,size);
 }
 void buf_flush(void)
 {
 	if(buf_x)
 	{
-		write(fd,buf,buf_x);
+		if(write(fd,buf,buf_x)!=buf_x)
+		{
+			write(1,"Failed to write data\n",21);
+			exit(2);
+		}
 		buf_x=0;
 	}
 }
@@ -145,13 +156,15 @@ void write_fat(void)
 
 int main(int argc,char **argv)
 {
-	if(argc<2)
+	if(argc!=2)
 	{
+		write(1,"Usage: mkfs.fat <PARTITION>\n",28);
 		return 1;
 	}
 	fd=open(argv[1],2,0);
 	if(fd<0)
 	{
+		write(1,"Cannot open device\n",19);
 		return 1;
 	}
 	if(init_fs_info())

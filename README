@@ -1,6 +1,6 @@
 These are simplified partition formatting tools for Linux x86_64 and
 Linux ARM64.
-To compile this program, you need to download my SCC compiler and
+To compile this project, you need to download my SCC compiler and
 copy the compiler directory to "bin" first. Then run "./build.sh".
 The source files of my SCC compiler are at
 https://github.com/XXXXXXXXsegfault/scc_64 .

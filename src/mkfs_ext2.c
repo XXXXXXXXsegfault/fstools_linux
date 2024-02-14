@@ -35,11 +35,13 @@ int init_fs_info(void)
 	size=lseek(fd,0,2);
 	if(!valid(size))
 	{
+		write(1,"Cannot determine device size\n",29);
 		return 1;
 	}
 	blocks=size>>12;
 	if(blocks==0)
 	{
+		write(1,"Device is too small\n",20);
 		return 1;
 	}
 	last_group_size=blocks&32767;
@@ -50,6 +52,7 @@ int init_fs_info(void)
 	groups=blocks+32767>>15;
 	if(groups==0)
 	{
+		write(1,"Device is too small\n",20);
 		return 1;
 	}
 	gt_blocks=groups+127>>7;
@@ -99,14 +102,21 @@ int init_fs_info(void)
 			--groups;
 		}
 	}
-	if(groups==0||blocks>0xffffffff)
+	if(groups==0)
 	{
+		write(1,"Device is too small\n",20);
+		return 1;
+	}
+	if(blocks>0xffffffff)
+	{
+		write(1,"Device is too large\n",20);
 		return 1;
 	}
 	gt_blocks=groups+127>>7;
 	gdt=mmap(0,gt_blocks<<12,3,0x22,-1,0);
 	if(!valid(gdt))
 	{
+		write(1,"Cannot allocate memory\n",23);
 		return 1;
 	}
 
@@ -339,13 +349,15 @@ int main(int argc,char **argv)
 {
 	unsigned long x;
 	unsigned int nb[3];
-	if(argc<2)
+	if(argc!=2)
 	{
+		write(1,"Usage: mkfs.ext2 <PARTITION>\n",29);
 		return 1;
 	}
 	fd=open(argv[1],2,0);
 	if(fd<0)
 	{
+		write(1,"Cannot open device\n",19);
 		return 1;
 	}
 	if(init_fs_info())

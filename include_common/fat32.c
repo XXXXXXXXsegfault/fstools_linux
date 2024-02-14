@@ -1,5 +1,3 @@
-#ifndef _FAT32_C_
-#define _FAT32_C_
 struct fat32_bpb
 {
 	unsigned char jump[3]; //eb XX 90
@@ -42,4 +40,3 @@ struct fat32_fsinfo
 	unsigned char rsv[12];
 	unsigned int signature3; //0xaa550000
 };
-#endif

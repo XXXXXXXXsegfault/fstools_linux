@@ -383,7 +383,7 @@ int main(int argc,char **argv)
 	unsigned int has_super[3];
 	if(argc!=2)
 	{
-		write(1,"Usage: mkfs_ext4 <PARTITION>\n",29);
+		write(1,"Usage: mkfs.ext4 <PARTITION>\n",29);
 		return 1;
 	}
 	fd=open(argv[1],1,0);

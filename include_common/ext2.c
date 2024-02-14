@@ -1,5 +1,3 @@
-#ifndef _EXT2_C_
-#define _EXT2_C_
 struct ext2_superblock
 {
 	unsigned int inodes;
@@ -94,4 +92,3 @@ struct ext2_directory
 	unsigned char file_type;
 	char file_name[1];
 };
-#endif
