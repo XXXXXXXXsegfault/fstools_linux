@@ -84,7 +84,14 @@ int init_fs_info(void)
 	gdt[0].block_bitmap=value;
 	gdt[0].inode_bitmap=value+1;
 	gdt[0].inode_table=value+2;
-	free_blocks=28156-gdt_blocks;
+	if(groups==1)
+	{
+		free_blocks=blocks-4612-gdt_blocks;
+	}
+	else
+	{
+		free_blocks=28156-gdt_blocks;
+	}
 	gdt[0].free_blocks=free_blocks;
 	gdt[0].free_inodes=8182;
 	gdt[0].used_dirs=1;

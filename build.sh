@@ -1,23 +1,27 @@
 #!/bin/bash -ev
-build_program()
-{
-	bin/scpp $1 tmp/cc.i
-	bin/scc tmp/cc.i tmp/cc.asm
-	bin/asm tmp/cc.asm $2
-}
-if [ $# != 1 ]
+if [ ! $CC ]
 then
-	echo "HELP: ./build.sh <build-type>"
-	echo "Available Build Types:"
-	echo "arm64 x86_64"
-	exit 1
+	CC=gcc
 fi
-_LIB_=$1
-mkdir -p tmp release_$_LIB_ include
-cp include_$_LIB_/* include
-cp include_common/* include
-build_program src/mkfs_ext2.c release_$_LIB_/mkfs.ext2
-build_program src/mkfs_ext3.c release_$_LIB_/mkfs.ext3
-build_program src/mkfs_ext4.c release_$_LIB_/mkfs.ext4
-build_program src/mkfs_fat.c release_$_LIB_/mkfs.fat
-build_program src/mkfs_exfat.c release_$_LIB_/mkfs.exfat
+if [ ! $LD ]
+then
+	LD=ld
+fi
+if [ ! $OBJCOPY ]
+then
+	OBJCOPY=objcopy
+fi
+if [ ! $CFLAGS ]
+then
+	CFLAGS=-Os\ -nostdlib\ -fno-stack-protector\ -fcf-protection=none\ -fno-builtin
+fi
+CC=$CROSS_COMPILE$CC
+LD=$CROSS_COMPILE$LD
+OBJCOPY=$CROSS_COMPILE$OBJCOPY
+mkdir -p tmp release
+for fs in exfat ext2 ext4 fat
+do
+	$CC -c src/mkfs_$fs.c -o tmp/mkfs_$fs.o $CFLAGS
+	$LD tmp/mkfs_$fs.o -o tmp/mkfs.$fs -Ttext 0x100b0 -z max-page-size=4096
+	$OBJCOPY -R .comment -R .note.gnu.property -R .eh_frame -S tmp/mkfs.$fs release/mkfs.$fs
+done

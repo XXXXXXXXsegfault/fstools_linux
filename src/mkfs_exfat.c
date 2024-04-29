@@ -145,7 +145,7 @@ void write_bs(void)
 	{
 		if(i!=106&&i!=107&&i!=112)
 		{
-			checksum=(checksum>>1|checksum<<31)+(unsigned int)((unsigned char *)bsec)[i];
+			checksum=(checksum>>1|checksum<<31)+(unsigned int)((unsigned char *)&bsec)[i];
 		}
 		++i;
 	}
@@ -183,7 +183,7 @@ void write_bitmap(void)
 }
 void write_upcase(void)
 {
-	unsigned short *p;
+	const unsigned short *p;
 	unsigned short val;
 	int x;
 	p=exfat_upcase;

@@ -21,7 +21,7 @@ int init_fs_info(void)
 		return 1;
 	}
 	memcpy(bsec.jump,"\xeb\xfe\x90",3);
-	memcpy(bsec.oem_id,"FATLinux",8);
+	memcpy(bsec.oem_id,"Linux   ",8);
 	bsec.sector_size=512;
 	bsec.reserved_sectors=512;
 	bsec.fats=2;
