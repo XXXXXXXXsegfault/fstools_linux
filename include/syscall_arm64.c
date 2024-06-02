@@ -41,7 +41,7 @@ long write(int fd,void *buf,int size)
 {
 	return syscall(64,fd,buf,size,0,0,0);
 }
-long lseek(int fd,int pos,int w)
+long lseek(int fd,long int pos,int w)
 {
 	return syscall(62,fd,pos,w,0,0,0);
 }

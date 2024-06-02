@@ -386,7 +386,7 @@ void write_group(unsigned long n,int has_super)
 
 int main(int argc,char **argv)
 {
-	int i;
+	long i;
 	unsigned int has_super[3];
 	if(argc!=2)
 	{
